@@ -1,0 +1,10 @@
+{
+	"id": "numbered-cardview",
+	"name": "Bases Card Numbering",
+	"version": "1.0.0",
+	"minAppVersion": "0.15.0",
+	"description": "Dynamic numbering of Bases cards",
+	"author": "whomann",
+	"authorUrl": "https://github.com/whomann",
+	"isDesktopOnly": false
+}
