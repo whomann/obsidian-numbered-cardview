@@ -72,6 +72,17 @@ module.exports = class BasesNumberingPlugin extends Plugin {
         return foundCandidate;
     }
 
+    getVisibleResultCount(view) {
+        try {
+            const headerText = view.contentEl.innerText;
+            const match = headerText.match(/(\d+)\s+results/);
+            if (match && match[1]) {
+                return parseInt(match[1]);
+            }
+        } catch (e) {}
+        return 0;
+    }
+
     updateAll() {
         const leaves = this.app.workspace.getLeavesOfType('bases');
         leaves.forEach(leaf => this.updateView(leaf.view));
@@ -79,16 +90,17 @@ module.exports = class BasesNumberingPlugin extends Plugin {
 
     updateView(view) {
         if (!view || !view.file || !view.contentEl) return;
-        const parentFolder = view.file.parent.path;
-
-        const allFiles = this.app.vault.getMarkdownFiles().filter(f => f.path.startsWith(parentFolder));
-        const targetCount = allFiles.length;
 
         let masterList = [];
         let sourceMode = "Fallback";
 
-        let magicArray = this.findArrayByLength(view, targetCount);
+        const visibleCount = this.getVisibleResultCount(view);
         
+        let magicArray = null;
+        if (visibleCount > 0) {
+            magicArray = this.findArrayByLength(view, visibleCount);
+        }
+
         if (!magicArray) {
             magicArray = this.findLargestArray(view);
         }
@@ -102,6 +114,8 @@ module.exports = class BasesNumberingPlugin extends Plugin {
             }).filter(p => p);
             sourceMode = "Magic Match";
         } else {
+            const parentFolder = view.file.parent.path;
+            const allFiles = this.app.vault.getMarkdownFiles().filter(f => f.path.startsWith(parentFolder));
             masterList = allFiles.sort((a,b) => a.basename.localeCompare(b.basename)).map(f => f.path);
         }
 
